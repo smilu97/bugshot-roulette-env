@@ -1,5 +1,6 @@
 from bugshot import BugShotGameBuilder, BugShotGameConfig
-from bugshot.enums import BugShotPlayer, BugShotAction, BugShotItem
+from bugshot.state import BugShotState
+from bugshot.enums import BugShotPlayer, BugShotAction, BugShotItem, BugShotShell
 from agent import MonteCarloBugShotGameAgent
 from imagine import CombinationBugShotImagine
 from explorer import RandomBugShotStateExplorer
@@ -19,67 +20,66 @@ def main():
 
     dispatcher = game_builder.build(config=config).dispatcher
     monte_agent = MonteCarloBugShotGameAgent(
-        num_trials=100,
+        num_trials=1000,
         dispatcher=dispatcher,
         imagine=CombinationBugShotImagine(max_chambers=100),
         explorer=RandomBugShotStateExplorer(dispatcher=dispatcher),
     )
 
     while game.get_winner() is None:
-        observation = game.observe()
-        print_observation(observation)
-        turn = game.get_turn()
-        if turn == BugShotPlayer.PLAYER1:
+        print_state(game.state)
+        if game.get_turn() == BugShotPlayer.PLAYER1:
             action = input_action(dispatcher.get_available_actions(game.state))
-            game.do_action(action)
+            print(f'Player action: {action.value}')
         else:
-            action = monte_agent.act(observation=observation)
+            action = monte_agent.act(observation=game.observe())
             print(f'Opponent action: {action.value}')
-            game.do_action(action)
+        game.do_action(action)
     
     print(f'{game.get_winner().value} wins!')
 
-def print_observation(observation: list[int]):
+def print_state(state: BugShotState):
     indent = 2
 
-    num_live_shells = observation[0]
-    num_blank_shells = observation[1]
-    init_life = observation[2]
-    life_player1 = observation[3]
-    life_player2 = observation[4]
-    items_player1 = observation[5:5+len(BugShotItem)]
-    items_player2 = observation[5+len(BugShotItem):5+2*len(BugShotItem)]
-    is_opponent_handcuffed = observation[5+2*len(BugShotItem)]
-    is_magnified_live = observation[5+2*len(BugShotItem)+1]
-    is_magnified_blank = observation[5+2*len(BugShotItem)+2]
-    is_shotgun_sawed = observation[5+2*len(BugShotItem)+3]
+    num_live_shells = state.chamber.count(BugShotShell.LIVE)
+    num_blank_shells = state.chamber.count(BugShotShell.BLANK)
+    life_player1 = state.life_dict[BugShotPlayer.PLAYER1]
+    life_player2 = state.life_dict[BugShotPlayer.PLAYER2]
+    items_player1 = state.item_boards[BugShotPlayer.PLAYER1].describe()
+    items_player2 = state.item_boards[BugShotPlayer.PLAYER2].describe()
+    is_opponent_handcuffed = state.is_opponent_handcuffed
+    is_magnified_live = state.is_magnified_shell and state.chamber[-1] == BugShotShell.LIVE
+    is_magnified_blank = state.is_magnified_shell and state.chamber[-1] == BugShotShell.BLANK
+    magnifier_result = 'live' if is_magnified_live else 'blank' if is_magnified_blank else 'none'
+    is_shotgun_sawed = state.is_shotgun_sawed
     
     print(f'--------------- Observation ---------------')
     print(f'{"Live shells":<{indent}}: {num_live_shells}')
     print(f'{"Blank shells":<{indent}}: {num_blank_shells}')
-    print(f'{"Initial life":<{indent}}: {init_life}')
-    print(f'{"Life player1":<{indent}}: {life_player1}')
-    print(f'{"Life player2":<{indent}}: {life_player2}')
-    print(f'{"Items player1":<{indent}}: {describe_item_board_observation(items_player1)}')
-    print(f'{"Items player2":<{indent}}: {describe_item_board_observation(items_player2)}')
-    print(f'{"Opponent handcuffed":<{indent}}: {is_opponent_handcuffed}')
-    print(f'{"Magnified live":<{indent}}: {is_magnified_live}')
-    print(f'{"Magnified blank":<{indent}}: {is_magnified_blank}')
-    print(f'{"Shotgun sawed":<{indent}}: {is_shotgun_sawed}')
-
-def describe_item_board_observation(observation: list[int]):
-    return '[' + ', '.join([f'{item.value}: {observation[i]}' for i, item in enumerate(BugShotItem)]) + ']'
+    print(f'{"Lifes":<{indent}}: {life_player1} vs {life_player2}')
+    print(f'{"Items player1":<{indent}}: {items_player1}')
+    print(f'{"Items player2":<{indent}}: {items_player2}')
+    if is_opponent_handcuffed:
+        print(f'{"Opponent handcuffed":<{indent}}: True')
+    if magnifier_result != 'none':
+        print(f'{"Magnified":<{indent}}: {magnifier_result}')
+    if is_shotgun_sawed:
+        print(f'{"Shotgun sawed":<{indent}}: True')
 
 def input_action(valid_actions: list[BugShotAction]):
-    valid_actions = [x.value for x in valid_actions]
+    valid_action_values = [x.value for x in valid_actions]
+    print(f'Available actions: {valid_action_values}')
     while True:
-        print(f'Available actions: {valid_actions}')
-        action = input('Enter action: ')
         try:
-            action = BugShotAction(action)
-            return action
+            action = input(f'Enter action (1-{len(valid_actions)}): ')
+            action = int(action)
+            if action < 1 or action > len(valid_actions):
+                continue
+            return valid_actions[action - 1]
+        except KeyboardInterrupt as e:
+            raise e
         except:
-            pass
+            continue
 
 if __name__ == '__main__':
     main()

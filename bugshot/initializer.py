@@ -32,12 +32,19 @@ class DefaultBugShotChamberInitializer(BugShotChamberInitializer):
     max_shell: int
 
     def __init__(self, min_shell: int = 3, max_shell: int = 6):
+        if min_shell < 2:
+            raise ValueError('min_shell must be greater than or equal to 2')
         self.min_shell = min_shell
         self.max_shell = max_shell
 
     def initialize(self):
         num_shell = random.randint(self.min_shell, self.max_shell)
-        return [self.__random_shell() for _ in range(num_shell)]
+        num_live = random.randint(1, num_shell - 1)
+        lives = [BugShotShell.LIVE for _ in range(num_live)]
+        blanks = [BugShotShell.BLANK for _ in range(num_shell - num_live)]
+        shells = lives + blanks
+        random.shuffle(shells)
+        return shells
     
     def __random_shell(self):
         return BugShotShell.LIVE if random.randint(0, 1) else BugShotShell.BLANK
