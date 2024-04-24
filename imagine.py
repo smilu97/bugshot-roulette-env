@@ -3,8 +3,13 @@ import itertools
 
 from abc import ABCMeta, abstractmethod
 
-from bugshot.state import BugShotState, BugShotItemBoard
-from bugshot.enums import BugShotItem, BugShotPlayer, BugShotShell
+from bugshot import (
+    BugShotState,
+    BugShotItemBoard,
+    BugShotItem,
+    BugShotPlayer,
+    BugShotShell,
+)
 
 class BugShotImagine(metaclass=ABCMeta):
     

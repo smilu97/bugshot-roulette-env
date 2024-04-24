@@ -2,9 +2,12 @@ import random
 
 from abc import ABCMeta, abstractmethod
 
-from bugshot.state import BugShotState
-from bugshot.dispatcher import BugShotStateDispatcher
-from bugshot.enums import BugShotAction, BugShotPlayer
+from bugshot import (
+    BugShotState,
+    BugShotStateDispatcher,
+    BugShotAction,
+    BugShotPlayer,
+)
 
 class BugShotStateExplorer(metaclass=ABCMeta):
     

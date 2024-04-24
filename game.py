@@ -1,6 +1,13 @@
-from bugshot import BugShotGameBuilder, BugShotGameConfig
-from bugshot.state import BugShotState
-from bugshot.enums import BugShotPlayer, BugShotAction, BugShotItem, BugShotShell
+#!/usr/bin/env python
+
+from bugshot import (
+    BugShotGameBuilder,
+    BugShotGameConfig,
+    BugShotState,
+    BugShotPlayer,
+    BugShotAction,
+    BugShotShell,
+)
 from agent import MonteCarloBugShotGameAgent
 from imagine import CombinationBugShotImagine
 from explorer import RandomBugShotStateExplorer

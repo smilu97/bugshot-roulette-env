@@ -45,9 +45,6 @@ class DefaultBugShotChamberInitializer(BugShotChamberInitializer):
         shells = lives + blanks
         random.shuffle(shells)
         return shells
-    
-    def __random_shell(self):
-        return BugShotShell.LIVE if random.randint(0, 1) else BugShotShell.BLANK
 
 class FixedBugShotChamberInitializer(BugShotChamberInitializer):
 

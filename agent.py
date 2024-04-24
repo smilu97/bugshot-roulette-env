@@ -3,8 +3,7 @@ import random
 from collections import Counter
 from abc import ABCMeta, abstractmethod
 
-from bugshot.enums import BugShotAction
-from bugshot.dispatcher import BugShotStateDispatcher
+from bugshot import BugShotAction, BugShotStateDispatcher
 from explorer import BugShotStateExplorer
 from imagine import BugShotImagine, RandomBugShotImagine
 

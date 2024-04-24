@@ -1,7 +1,13 @@
+#!/usr/bin/env python
+
 from tqdm import tqdm
 import sys
 
-from bugshot import BugShotGameBuilder, BugShotGameConfig, BugShotPlayer
+from bugshot import (
+    BugShotGameBuilder,
+    BugShotGameConfig,
+    BugShotPlayer,
+)
 from agent import BugShotGameAgent, RandomBugShotGameAgent, MonteCarloBugShotGameAgent
 from imagine import CombinationBugShotImagine
 from explorer import RandomBugShotStateExplorer
