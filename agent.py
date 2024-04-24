@@ -1,10 +1,11 @@
 import random
 
+from collections import Counter
 from abc import ABCMeta, abstractmethod
 
 from bugshot.enums import BugShotAction
 from bugshot.dispatcher import BugShotStateDispatcher
-from evaluator import BugShotStateEvaluator
+from explorer import BugShotStateExplorer
 from imagine import BugShotImagine, RandomBugShotImagine
 
 class BugShotGameAgent(metaclass=ABCMeta):
@@ -61,24 +62,42 @@ class RandomBugShotGameAgent(BugShotGameAgent):
 
 class MonteCarloBugShotGameAgent(BugShotGameAgent):
     
+    num_trials: int
     dispatcher: BugShotStateDispatcher
     imagine: BugShotImagine
-    evaluator: BugShotStateEvaluator
+    explorer: BugShotStateExplorer
 
-    def __init__(self, dispatcher: BugShotStateDispatcher, imagine: BugShotImagine, evaluator: BugShotStateEvaluator):
+    def __init__(self, num_trials: int, dispatcher: BugShotStateDispatcher, imagine: BugShotImagine, explorer: BugShotStateExplorer):
         super().__init__()
+        self.num_trials = num_trials
         self.dispatcher = dispatcher
         self.imagine = imagine
-        self.evaluator = evaluator
+        self.explorer = explorer
 
     def act(self, observation: list[int]) -> BugShotAction:
-        states = self.imagine.imagine(observation)
+        root_states = self.imagine.imagine(observation)
 
-        best_action = None
-        best_score = -9999
-        for action in list(BugShotAction):
-            score = sum((self.evaluator.evaluate(self.dispatcher.dispatch(state, action)) for state in states))
-            if score > best_score:
-                best_action = action
-                best_score = score
-        return best_action
+        count_win = Counter()
+        count_lose = Counter()
+
+        for _ in range(self.num_trials):
+            root_state = random.choice(root_states)
+            is_win, actions = self.explorer.explore(root_state)
+        
+            if len(actions) == 0:
+                continue
+            action = actions[0]
+
+            if is_win:
+                count_win[action] += 1
+            else:
+                count_lose[action] += 1
+
+        win_ratios = dict()
+        
+        for action in BugShotAction:
+            count_total = count_win[action] + count_lose[action]
+            if count_total != 0:
+                win_ratios[action] = count_win[action] / count_total
+        
+        return max(win_ratios, key=win_ratios.get)

@@ -21,6 +21,9 @@ class BugShotItemBoard:
     
     def get_num_items(self) -> int:
         return sum(self.remains.values())
+    
+    def describe(self) -> str:
+        return '[' + ', '.join([f'{k.value}: {v}' for k, v in self.remains.items()]) + ']'
 
 class BugShotState:
 
@@ -76,8 +79,8 @@ class BugShotState:
         print(f'{indent_str}Life2: {self.life_dict[BugShotPlayer.PLAYER2]}')
         print(f'{indent_str}Item Boards:')
         for player, item_board in self.item_boards.items():
-            remains = [v for _, v in item_board.remains.items()]
-            print(f'{indent_str}  {player.value}: {remains}')
+            board_description = item_board.describe()
+            print(f'{indent_str}  {player.value}: {board_description}')
         print(f'{indent_str}Opponent Handcuffed: {self.is_opponent_handcuffed}')
         print(f'{indent_str}Magnified Shell: {self.is_magnified_shell}')
         print(f'{indent_str}Shotgun Sawed: {self.is_shotgun_sawed}')
