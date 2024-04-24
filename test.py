@@ -1,5 +1,9 @@
+from tqdm import tqdm
+
 from bugshot import BugShotGameBuilder, BugShotGameConfig, BugShotPlayer
-from agent import BugShotGameAgent, RandomBugShotGameAgent
+from agent import BugShotGameAgent, RandomBugShotGameAgent, MonteCarloBugShotGameAgent
+from imagine import CombinationBugShotImagine
+from evaluator import MonteCarloBugShotStateEvaluator
 
 class BugShotGameTester:
 
@@ -53,25 +57,40 @@ def main():
         min_items_per_init=2,
         max_items_per_init=4,
         max_items_per_board=8,
-        min_shell=2,
-        max_shell=6,
-        initial_life=3,
+        min_shell=3,
+        max_shell=8,
+        min_initial_life=2,
+        max_initial_life=3,
     )
     game_builder = BugShotGameBuilder()
 
-    agent1 = RandomBugShotGameAgent()
-    agent2 = RandomBugShotGameAgent()
+    dispatcher = game_builder.build(config=config).dispatcher
+    monte_agent = MonteCarloBugShotGameAgent(
+        dispatcher=dispatcher,
+        imagine=CombinationBugShotImagine(max_chambers=100),
+        evaluator=MonteCarloBugShotStateEvaluator(
+            dispatcher=dispatcher,
+            num_trials=100,
+        ),
+    )
+    random_agent = RandomBugShotGameAgent(dispatcher=dispatcher)
     
     tester = BugShotGameTester(
         config=config,
         game_builder=game_builder,
-        agent1=agent1,
-        agent2=agent2,
+        agent1=monte_agent,
+        agent2=random_agent,
         max_steps=1000,
     )
 
-    winner = tester.test(verbose=True)
-    print(f'Winner: {winner.value}')
+    num_trials = 100
+    num_wins = 0
+    for _ in tqdm(range(num_trials)):
+        winner = tester.test(verbose=False)
+        if winner == BugShotPlayer.PLAYER1:
+            num_wins += 1
+    
+    print(f'Win rate: {num_wins / num_trials}')
 
 if __name__ == '__main__':
     main()

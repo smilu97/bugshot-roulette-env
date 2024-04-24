@@ -19,33 +19,9 @@ class BugShotStateDispatcher(metaclass=ABCMeta):
     @abstractmethod
     def get_winner(self, state: BugShotState) -> BugShotPlayer:
         raise NotImplementedError()
-
+    
     @abstractmethod
-    def _use_shotgun_self(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_shotgun_opponent(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_handcuffs(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_beer(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_magnifying_glass(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_cigarattes(self, state: BugShotState) -> BugShotState:
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _use_hand_saw(self, state: BugShotState) -> BugShotState:
+    def get_available_actions(self, state: BugShotState) -> list[BugShotAction]:
         raise NotImplementedError()
 
 class DefaultBugShotStateDispatcher(BugShotStateDispatcher):
@@ -77,6 +53,25 @@ class DefaultBugShotStateDispatcher(BugShotStateDispatcher):
 
         return self.__dispatch_common(self.__dispatch_action(state, action))
         
+    def get_available_actions(self, state: BugShotState) -> list[BugShotAction]:
+        actions = list()
+        item_board = state.item_boards[state.turn]
+        if item_board.remains[BugShotItem.HANDCUFFS] > 0 and not state.is_opponent_handcuffed:
+            actions.append(BugShotAction.USE_HANDCUFFS)
+        if item_board.remains[BugShotItem.BEER] > 0:
+            actions.append(BugShotAction.USE_BEER)
+        if item_board.remains[BugShotItem.MAGNIFYING_GLASS] > 0 and not state.is_magnified_shell:
+            actions.append(BugShotAction.USE_MAGNIYING_GLASS)
+        if item_board.remains[BugShotItem.CIGARATTES] > 0:
+            actions.append(BugShotAction.USE_CIGARATTES)
+        if item_board.remains[BugShotItem.HAND_SAW] > 0 and not state.is_shotgun_sawed:
+            actions.append(BugShotAction.USE_HAND_SAW)
+
+        return [
+            BugShotAction.USE_SHOTGUN_SELF,
+            BugShotAction.USE_SHOTGUN_OPPONENT,
+        ] + actions
+    
     def __dispatch_action(
             self,
             state: BugShotState,

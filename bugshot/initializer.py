@@ -42,31 +42,53 @@ class DefaultBugShotChamberInitializer(BugShotChamberInitializer):
     def __random_shell(self):
         return BugShotShell.LIVE if random.randint(0, 1) else BugShotShell.BLANK
 
+class FixedBugShotChamberInitializer(BugShotChamberInitializer):
+
+    num_blanks: int
+    num_lives: int
+
+    def __init__(self, num_blanks: int, num_lives: int):
+        self.num_blanks = num_blanks
+        self.num_lives = num_lives
+    
+    def initialize(self):
+        chamber = [
+            BugShotShell.BLANK for _ in range(self.num_blanks)
+        ] + [
+            BugShotShell.LIVE for _ in range(self.num_lives)
+        ]
+        random.shuffle(chamber)
+        return chamber
+
 class DefaultBugShotStateInitializer(BugShotStateInitializer):
 
-    initial_life: int
+    min_initial_life: int
+    max_initial_life: int
     item_board_initializer: BugShotItemBoardInitializer
     chamber_initializer: BugShotChamberInitializer
 
     def __init__(
             self,
-            initial_life: int,
+            min_initial_life: int,
+            max_initial_life: int,
             item_board_initializer: BugShotItemBoardInitializer,
             chamber_initializer: BugShotChamberInitializer,
         ):
 
-        self.initial_life = initial_life
+        self.min_initial_life = min_initial_life
+        self.max_initial_life = max_initial_life
         self.item_board_initializer = item_board_initializer
         self.chamber_initializer = chamber_initializer
 
     def initialize(self):
+        init_life = random.randint(self.min_initial_life, self.max_initial_life)
         return BugShotState(
             turn=BugShotPlayer.PLAYER1,
             chamber=self.chamber_initializer.initialize(),
-            init_life=self.initial_life,
+            init_life=init_life,
             life_dict={
-                BugShotPlayer.PLAYER1: self.initial_life,
-                BugShotPlayer.PLAYER2: self.initial_life,
+                BugShotPlayer.PLAYER1: init_life,
+                BugShotPlayer.PLAYER2: init_life,
             },
             item_boards=self.item_board_initializer.initialize(),
         )

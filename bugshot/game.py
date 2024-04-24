@@ -54,7 +54,8 @@ class BugShotGameConfig:
     max_items_per_board: int
     min_shell: int
     max_shell: int
-    initial_life: int
+    min_initial_life: int
+    max_initial_life: int
 
     def __init__(
             self,
@@ -63,7 +64,8 @@ class BugShotGameConfig:
             max_items_per_board: int,
             min_shell: int,
             max_shell: int,
-            initial_life: int,
+            min_initial_life: int,
+            max_initial_life: int,
         ):
 
         self.min_items_per_init = min_items_per_init
@@ -71,7 +73,8 @@ class BugShotGameConfig:
         self.max_items_per_board = max_items_per_board
         self.min_shell = min_shell
         self.max_shell = max_shell
-        self.initial_life = initial_life
+        self.min_initial_life = min_initial_life
+        self.max_initial_life = max_initial_life
 
 class BugShotGameBuilder:
 
@@ -81,7 +84,8 @@ class BugShotGameBuilder:
         max_items_per_board = config.max_items_per_board
         min_shell = config.min_shell
         max_shell = config.max_shell
-        initial_life = config.initial_life
+        min_initial_life = config.min_initial_life
+        max_initial_life = config.max_initial_life
 
         item_board_initializer = DefaultBugShotItemBoardInitializer(
             min_items=min_items_per_init,
@@ -92,7 +96,8 @@ class BugShotGameBuilder:
             max_shell=max_shell,
         )
         state_initializer = DefaultBugShotStateInitializer(
-            initial_life=initial_life,
+            min_initial_life=min_initial_life,
+            max_initial_life=max_initial_life,
             item_board_initializer=item_board_initializer,
             chamber_initializer=chamber_initializer,
         )

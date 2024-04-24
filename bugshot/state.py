@@ -53,7 +53,7 @@ class BugShotState:
             life_dict: dict[BugShotPlayer, int],
             item_boards: dict[BugShotPlayer, BugShotItemBoard],
             is_opponent_handcuffed: bool = False,
-            is_magnified_shell: BugShotShell | None = None,
+            is_magnified_shell: bool = False,
             is_shotgun_sawed: bool = False,
         ):
         
