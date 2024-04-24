@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 
 from bugshot import BugShotAction, BugShotStateDispatcher
 from explorer import BugShotStateExplorer
-from imagine import BugShotImagine, RandomBugShotImagine
+from decoder import BugShotStateDecoder, RandomBugShotStateDecoder
 
 class BugShotGameAgent(metaclass=ABCMeta):
     
@@ -49,32 +49,32 @@ class LoopDetectingBugShotGameAgent(BugShotGameAgent):
 class RandomBugShotGameAgent(BugShotGameAgent):
     
     dispatcher: BugShotStateDispatcher
-    imagine: BugShotImagine
+    decoder: BugShotStateDecoder
 
     def __init__(self, dispatcher: BugShotStateDispatcher):
         self.dispatcher = dispatcher
-        self.imagine = RandomBugShotImagine()
+        self.decoder = RandomBugShotStateDecoder()
 
     def act(self, observation: list[int]) -> BugShotAction:
-        state = self.imagine.imagine(observation)[0]
+        state = self.decoder.decode(observation)[0]
         return random.choice(self.dispatcher.get_available_actions(state))
 
 class MonteCarloBugShotGameAgent(BugShotGameAgent):
     
     num_trials: int
     dispatcher: BugShotStateDispatcher
-    imagine: BugShotImagine
+    decoder: BugShotStateDecoder
     explorer: BugShotStateExplorer
 
-    def __init__(self, num_trials: int, dispatcher: BugShotStateDispatcher, imagine: BugShotImagine, explorer: BugShotStateExplorer):
+    def __init__(self, num_trials: int, dispatcher: BugShotStateDispatcher, decoder: BugShotStateDecoder, explorer: BugShotStateExplorer):
         super().__init__()
         self.num_trials = num_trials
         self.dispatcher = dispatcher
-        self.imagine = imagine
+        self.decoder = decoder
         self.explorer = explorer
 
     def act(self, observation: list[int]) -> BugShotAction:
-        root_states = self.imagine.imagine(observation)
+        root_states = self.decoder.decode(observation)
 
         count_win = Counter()
         count_lose = Counter()

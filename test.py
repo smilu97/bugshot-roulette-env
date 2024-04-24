@@ -9,7 +9,7 @@ from bugshot import (
     BugShotPlayer,
 )
 from agent import BugShotGameAgent, RandomBugShotGameAgent, MonteCarloBugShotGameAgent
-from imagine import CombinationBugShotImagine
+from decoder import CombinationBugShotStateDecoder
 from explorer import RandomBugShotStateExplorer
 
 class BugShotGameTester:
@@ -83,7 +83,7 @@ def main():
     monte_agent = MonteCarloBugShotGameAgent(
         num_trials=100,
         dispatcher=dispatcher,
-        imagine=CombinationBugShotImagine(max_chambers=100),
+        decoder=CombinationBugShotStateDecoder(max_chambers=100),
         explorer=RandomBugShotStateExplorer(dispatcher=dispatcher),
     )
     random_agent = RandomBugShotGameAgent(dispatcher=dispatcher)

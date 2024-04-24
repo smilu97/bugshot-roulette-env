@@ -11,15 +11,15 @@ from bugshot import (
     BugShotShell,
 )
 
-class BugShotImagine(metaclass=ABCMeta):
+class BugShotStateDecoder(metaclass=ABCMeta):
     
     @abstractmethod
-    def imagine(self, observation: list[int]) -> list[BugShotState]:
+    def decode(self, observation: list[int]) -> list[BugShotState]:
         raise NotImplementedError()
 
-class AbstractBugShotImagine(BugShotImagine):
+class AbstractBugShotStateDecoder(BugShotStateDecoder):
 
-    def imagine(self, observation: list[int]) -> list[BugShotState]:
+    def decode(self, observation: list[int]) -> list[BugShotState]:
         num_live_shells = observation[0]
         num_blank_shells = observation[1]
         init_life = observation[2]
@@ -63,15 +63,15 @@ class AbstractBugShotImagine(BugShotImagine):
             remains[item] = num
         return BugShotItemBoard(remains=remains)
 
-class RandomBugShotImagine(AbstractBugShotImagine):
+class RandomBugShotStateDecoder(AbstractBugShotStateDecoder):
     
-    num_imagine: int
+    size: int
 
-    def __init__(self, num_imagine: int = 1):
-        self.num_imagine = num_imagine
+    def __init__(self, size: int = 1):
+        self.size = size
     
     def _build_chambers(self, num_live: int, num_blank: int, is_magnified_live: int, is_magnified_blank: int) -> list[list[BugShotShell]]:
-        return [self.__build_chamber(num_live, num_blank, is_magnified_live, is_magnified_blank) for _ in range(self.num_imagine)]
+        return [self.__build_chamber(num_live, num_blank, is_magnified_live, is_magnified_blank) for _ in range(self.size)]
 
     def __build_chamber(self, num_live: int, num_blank: int, is_magnified_live: int, is_magnified_blank: int) -> list[BugShotShell]:
         chamber = [BugShotShell.LIVE] * (num_live - is_magnified_live) + [BugShotShell.BLANK] * (num_blank - is_magnified_blank)
@@ -84,7 +84,7 @@ class RandomBugShotImagine(AbstractBugShotImagine):
         
         return chamber
 
-class CombinationBugShotImagine(AbstractBugShotImagine):
+class CombinationBugShotStateDecoder(AbstractBugShotStateDecoder):
 
     max_chambers: int
 
